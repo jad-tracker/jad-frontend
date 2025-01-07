@@ -1,7 +1,5 @@
 # Jad Frontend
 
-# Jad Backend
-
 ## Instructiuni pentru pull request
 
 ### Initializare repo
