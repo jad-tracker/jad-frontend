@@ -4,6 +4,7 @@ import {AxiosError} from "axios";
 
 export interface User {
   token: string;
+  username: string;
   expiresIn: number;
   expirationDate?: Date;
 }
@@ -20,6 +21,7 @@ class UserService {
 
       return {
         ...response.data,
+        username,
         expirationDate: new Date(Date.now() + response.data.expiresIn),
       };
     } catch (error) {

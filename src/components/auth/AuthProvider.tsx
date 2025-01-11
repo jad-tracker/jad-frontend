@@ -13,6 +13,7 @@ interface AuthState {
   loginError: ApiError | null;
   registerError: ApiError | null;
   token: string;
+  username: string;
   login?: LoginFunction;
   logout?: LogoutFunction;
   register?: RegisterFunction;
@@ -24,6 +25,7 @@ const initialState: AuthState = {
   loginError: null,
   registerError: null,
   token: "",
+  username: "",
 };
 
 export const AuthContext = createContext<AuthState>(initialState);
@@ -34,7 +36,7 @@ interface AuthProviderProps {
 
 export default function AuthProvider({ children }: AuthProviderProps) {
   const [authState, setAuthState] = useState<AuthState>(initialState);
-  const {getValue, setValue} = useLocalStorage<User>("auth", {token: "", expiresIn: 0});
+  const {getValue, setValue} = useLocalStorage<User>("auth", {token: "", username: "", expiresIn: 0});
   const shouldSetupInvalidateToken = useRef<Boolean>(false);
   const expirationTime = useRef<number>(0);
 
@@ -56,6 +58,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         ...authState,
         authenticated: true,
         token: user.token,
+        username: user.username,
         isAuthenticating: false,
         loginError: null,
       });
@@ -74,12 +77,13 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   }, [setValue, userService, authState, shouldSetupInvalidateToken, expirationTime]);
 
   const logout = useCallback(() => {
-    setValue({token: "", expiresIn: 0});
+    setValue({token: "", username: "", expiresIn: 0});
 
     setAuthState({
       ...authState,
       authenticated: false,
       token: "",
+      username: "",
     });
   }, [authState, setValue]);
 
@@ -109,9 +113,9 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [userService, authState]);
 
-  const {authenticated, token, loginError, registerError, isAuthenticating} = authState;
+  const {authenticated, token, username, loginError, registerError, isAuthenticating} = authState;
   const value = {
-    authenticated, token, loginError, registerError, isAuthenticating,
+    authenticated, token, username, loginError, registerError, isAuthenticating,
     login, logout, register,
   };
 
@@ -122,15 +126,16 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   );
 
   function loadTokenEffect() {
-    const { token, expirationDate } = getValue();
+    const { token, username, expirationDate } = getValue();
 
     if (token.trim() !== "") {
       if (expirationDate && new Date(expirationDate) < new Date()) {
-        setValue({token: "", expiresIn: 0});
+        setValue({token: "", username: "", expiresIn: 0});
         setAuthState({
           ...authState,
           authenticated: false,
           token: "",
+          username: "",
         });
 
         return;
@@ -140,6 +145,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         ...authState,
         authenticated: true,
         token,
+        username,
       });
     }
   }
@@ -149,11 +155,12 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       shouldSetupInvalidateToken.current = false;
 
       const handle = setTimeout(() => {
-        setValue({token: "", expiresIn: 0});
+        setValue({token: "", username: "", expiresIn: 0});
         setAuthState({
           ...authState,
           authenticated: false,
           token: "",
+          username: "",
         });
       }, expirationTime.current);
 
