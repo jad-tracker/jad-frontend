@@ -17,9 +17,12 @@ export default function ProjectCard({project, editable = false, isOwner = false}
   };
 
   return (
-    <Card sx={{':hover': {
-        boxShadow: 6, // theme.shadows[20]
-      },}}>
+    <Card sx={{
+        ':hover': {
+          boxShadow: 6,
+        },
+      }}
+    >
       <CardActionArea onClick={handleCardClick}>
         <CardHeader
           title={project.name}
