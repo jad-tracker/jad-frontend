@@ -9,7 +9,6 @@ export default function MainPage() {
       <AppNavBar />
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        <h1>Main Page</h1>
         <Outlet />
       </Box>
     </Box>
