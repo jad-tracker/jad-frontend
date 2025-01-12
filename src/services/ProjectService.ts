@@ -15,6 +15,16 @@ export interface ProjectMember {
   role: string;
 }
 
+export interface Issue {
+  id: number;
+  summary: string;
+  description: string;
+  type: string;
+  status: string;
+  date: string;
+  assignee: string;
+}
+
 class ProjectService {
   private endpoint = "/projects";
 

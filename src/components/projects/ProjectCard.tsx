@@ -47,7 +47,7 @@ export default function ProjectCard({project, editable = false, isOwner = false}
       <CardActionArea onClick={handleCardClick}>
         <CardHeader
           title={project.name}
-          subheader={`Lead: ${isOwner ? 'You' : project.lead}`}
+          subheader={`Managed by ${isOwner ? 'You' : project.lead}`}
         />
         <CardContent>
           <Typography variant="body2" sx={{color: 'text.secondary'}}>
