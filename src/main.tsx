@@ -5,14 +5,18 @@ import { CssBaseline } from '@mui/material';
 import theme from './theme';
 import App from './App';
 import AuthProvider from "./components/auth/AuthProvider";
+import {HTML5Backend} from "react-dnd-html5-backend";
+import {DndProvider} from "react-dnd";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </ThemeProvider>
+    <DndProvider backend={ HTML5Backend }>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ThemeProvider>
+    </DndProvider>
   </React.StrictMode>,
 );
