@@ -1,7 +1,11 @@
 import {Project} from "../../services/ProjectService";
-import {Button, Card, CardActionArea, CardActions, CardContent, CardHeader} from "@mui/material";
+import {Button, Card, CardActionArea, CardActions, CardContent, CardHeader, Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {useNavigate} from "react-router-dom";
+import {useContext, useState} from "react";
+import RenameProjectDialog from "./RenameProjectDialog";
+import {ProjectContext} from "./ProjectProvider";
+import ErrorSnackbar from "../core/ErrorSnackbar";
 
 interface ProjectCardProps {
   project: Project;
@@ -10,10 +14,27 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({project, editable = false, isOwner = false}: ProjectCardProps) {
+  const [isRenameProjectDialogOpen, setRenameProjectDialogOpen] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const {deleteProject, deleteError} = useContext(ProjectContext);
   const navigate = useNavigate();
 
   const handleCardClick = () => {
     navigate(`/projects/${project.id}`);
+  };
+
+  const handleRenameProject = () => {
+    setRenameProjectDialogOpen(true);
+  };
+
+  const handleRenameProjectDialogClose = () => {
+    setRenameProjectDialogOpen(false);
+  };
+
+  const handleDeleteProject = () => {
+    deleteProject?.(project.id).then(() => {
+      setShowConfirmation(false);
+    }, () => {});
   };
 
   return (
@@ -36,9 +57,36 @@ export default function ProjectCard({project, editable = false, isOwner = false}
       </CardActionArea>
       {editable && (
         <CardActions>
-          <Button size="small">Edit</Button>
-          <Button size="small">Delete</Button>
+          {!showConfirmation ? (
+            <Stack direction="row">
+              <Button size="small" onClick={handleRenameProject}>
+                Rename
+              </Button>
+              <Button size="small" onClick={() => setShowConfirmation(true)}>
+                Delete
+              </Button>
+            </Stack>
+          ) : (
+            <Stack direction="row">
+              <Button size="small" onClick={handleDeleteProject}>
+                Confirm
+              </Button>
+              <Button size="small" onClick={() => setShowConfirmation(false)}>
+                Cancel
+              </Button>
+            </Stack>
+          )}
         </CardActions>
+      )}
+      {isRenameProjectDialogOpen && (
+        <RenameProjectDialog
+          open={isRenameProjectDialogOpen}
+          onClose={handleRenameProjectDialogClose}
+          project={project}
+        />
+      )}
+      {deleteError && (
+        <ErrorSnackbar error={deleteError} />
       )}
     </Card>
   );
