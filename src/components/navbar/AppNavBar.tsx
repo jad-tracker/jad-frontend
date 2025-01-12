@@ -16,8 +16,6 @@ export default function AppNavBar({disableLogout = false}: AppNavBarProps) {
   const {username, logout} = useAuth();
   const navigate = useNavigate();
 
-  console.log(username);
-
   const handleLogout = useCallback(() => {
     logout?.();
     navigate("/");

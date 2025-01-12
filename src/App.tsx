@@ -6,6 +6,9 @@ import RequireNotAuth from "./components/auth/RequireNotAuth";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import MainPage from "./pages/MainPage";
+import ProjectProvider from "./components/projects/ProjectProvider";
+import ProjectsPage from "./pages/ProjectsPage";
+import ProjectPage from "./pages/ProjectPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements([
@@ -18,7 +21,14 @@ const router = createBrowserRouter(
     </Route>,
 
     <Route element={<RequireAuth />}>
-      <Route path="/projects" element={<MainPage />}/>
+      <Route path="/projects" element={
+        <ProjectProvider>
+          <MainPage />
+        </ProjectProvider>
+      }>
+        <Route index element={<ProjectsPage />} />
+        <Route path=":projectId" element={<ProjectPage />} />
+      </Route>
     </Route>
   ])
 );
