@@ -1,4 +1,4 @@
-import {useContext} from "react";
+import {useContext, useState} from "react";
 import {ProjectContext} from "../components/projects/ProjectProvider";
 import ProjectsGrid from "../components/projects/ProjectsGrid";
 import {Button, Divider} from "@mui/material";
@@ -8,13 +8,23 @@ import Typography from "@mui/material/Typography";
 import useAuth from "../hooks/auth/useAuth";
 import ErrorSnackbar from "../components/core/ErrorSnackbar";
 import LoadingProjectsGrid from "../components/projects/LoadingProjectsGrid";
+import CreateProjectDialog from "../components/projects/CreateProjectDialog";
 
 export default function ProjectsPage() {
+  const [isCreateProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
   const {projects, loading, loadingError} = useContext(ProjectContext);
   const {username} = useAuth();
 
   const ownedProjects = projects?.filter(project => project.lead === username)
   const otherProjects = projects?.filter(project => project.lead !== username)
+
+  const handleCreateProject = () => {
+    setCreateProjectDialogOpen(true);
+  };
+
+  const handleCreateProjectDialogClose = () => {
+    setCreateProjectDialogOpen(false);
+  };
 
   return (
     <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
@@ -25,7 +35,7 @@ export default function ProjectsPage() {
               <Typography variant="h5" gutterBottom sx={{flexGrow: 1}}>
                 Your projects
               </Typography>
-              <Button>
+              <Button onClick={handleCreateProject}>
                 Create new project
               </Button>
             </Box>
@@ -71,6 +81,12 @@ export default function ProjectsPage() {
       </Grid>
       {loadingError && (
         <ErrorSnackbar error={loadingError} />
+      )}
+      {isCreateProjectDialogOpen && (
+        <CreateProjectDialog
+          open={isCreateProjectDialogOpen}
+          onClose={handleCreateProjectDialogClose}
+        />
       )}
     </Box>
   );
