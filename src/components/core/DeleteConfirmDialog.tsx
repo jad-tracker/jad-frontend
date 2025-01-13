@@ -3,9 +3,9 @@ import React from "react";
 
 interface DeleteConfirmDialogProps {
   isOpen: boolean,
-  setIsOpen,
+  setIsOpen:  React.Dispatch<React.SetStateAction<boolean>>,
   description: string,
-  onConfirm
+  onConfirm: () => void,
 }
 
 export default function DeleteConfirmDialog({isOpen, setIsOpen, description, onConfirm}: DeleteConfirmDialogProps) {

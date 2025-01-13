@@ -1,23 +1,28 @@
-import {Issue} from "../../services/ProjectService";
+import {Issue, issueService} from "../../services/IssueService";
 import {Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {useDrop} from "react-dnd";
 import IssueCard from "./IssueCard";
 import React, {useEffect, useRef, useState} from "react";
 import {DraggableTypes} from "../../pages/ProjectPage";
+import {Project} from "../../services/ProjectService";
+import useAuth from "../../hooks/auth/useAuth";
 
 interface IssueColumnProps {
   issues: Issue[],
   statusKey: string,
   title: string,
-  setAllIssues: React.Dispatch<React.SetStateAction<Issue[]>>
+  setAllIssues: React.Dispatch<React.SetStateAction<Issue[]>>,
+  project: Project
 }
 
 
-export default function IssueColumn({issues, statusKey, title, setAllIssues}: IssueColumnProps) {
+export default function IssueColumn({issues, statusKey, title, setAllIssues, project}: IssueColumnProps) {
   const [ownIssues, setOwnIssues] = useState<Issue[]>([]);
   const issuesRef = useRef<Issue[]>([]);
   issuesRef.current = issues;
+
+  const {token} = useAuth();
 
   useEffect(() => {
     const filtered = issues.filter(item => item.status == statusKey);
@@ -25,19 +30,24 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues}: Is
   }, [issues])
 
   const handleDrop = (droppedIssue: Issue) => {
-    console.log(`Issue ${droppedIssue.id} dropped in column ${statusKey}`);
-    console.log(ownIssues);
-    const arr = issuesRef.current.map(issue => {
-      if (issue.id == droppedIssue.id) {
-        return ({
-          ...issue,
-          "status": statusKey
-        });
-      } else {
-        return issue;
-      }
+    // console.log(`Issue ${droppedIssue.id} dropped in column ${statusKey}`);
+    // console.log(ownIssues);
+    const updatedIssue = {
+      ...droppedIssue,
+      "status": statusKey
+    };
+    issueService.updateIssue(project, updatedIssue.id, updatedIssue.summary, updatedIssue.description,
+      updatedIssue.type, updatedIssue.status, updatedIssue.date, updatedIssue.assignee, token)
+    .then(() => {
+      const arr = issuesRef.current.map(issue => {
+        if (issue.id == droppedIssue.id) {
+          return updatedIssue;
+        } else {
+          return issue;
+        }
+      });
+      setAllIssues(arr);
     });
-    setAllIssues(arr);
   }
 
   const [{isDndOver}, drop] = useDrop(
@@ -64,7 +74,7 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues}: Is
       }}>{`${title} ${ownIssues.length}`}</Typography>
       <Stack sx={{minWidth: "300px", maxWidth: "600px", minHeight: "500px", marginTop: "10px"}} ref={drop}>
         {ownIssues.map(issue => (
-          <IssueCard issue={issue} key={issue.id}/>
+          <IssueCard issue={issue} key={issue.id} project={project} issues={issues} setIssues={setAllIssues}/>
         ))}
       </Stack>
     </Stack>

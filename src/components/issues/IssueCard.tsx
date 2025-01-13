@@ -1,16 +1,23 @@
-import {Avatar, Button, Card, CardContent, Dialog, Stack, styled} from "@mui/material";
+import {Avatar, Card, CardContent, Stack, styled} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import {Issue} from "../../services/ProjectService";
+import {Issue, issueService} from "../../services/IssueService";
 import {useDrag} from "react-dnd";
 import {DraggableTypes} from "../../pages/ProjectPage";
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteConfirmDialog from "../core/DeleteConfirmDialog";
 import React, {useState} from "react";
 import {avatarInitials, stringToColor} from "../../utils/AvatarUtils";
-import Box from "@mui/material/Box";
+import useAuth from "../../hooks/auth/useAuth";
+import {Project} from "../../services/ProjectService";
 
+interface IssueCardProps {
+  issue: Issue,
+  project: Project,
+  issues: Issue[],
+  setIssues: React.Dispatch<React.SetStateAction<Issue[]>>
+}
 
-export default function IssueCard({issue}: {issue: Issue}) {
+export default function IssueCard({issue, project, issues, setIssues}: IssueCardProps) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: DraggableTypes.ISSUE,
     item: issue,
@@ -19,9 +26,18 @@ export default function IssueCard({issue}: {issue: Issue}) {
     })
   }))
 
+  const {token} = useAuth();
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
-  const handleDeleteIssue = () => {}
+  const handleDeleteIssue = async () => {
+    await issueService.deleteIssue(project, issue.id, token);
+    const filtered = issues.filter(iss => {
+        return iss.id != issue.id;
+
+      })
+    setIssues(filtered);
+  }
 
   const CloseButton = styled(CloseIcon)(({ theme }) => ({
     color: "secondary",
