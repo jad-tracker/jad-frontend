@@ -1,5 +1,5 @@
 import {Issue, issueService} from "../../services/IssueService";
-import {Stack} from "@mui/material";
+import {Dialog, DialogTitle, Stack, styled} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {useDrop} from "react-dnd";
 import IssueCard from "./IssueCard";
@@ -7,6 +7,8 @@ import React, {useEffect, useRef, useState} from "react";
 import {DraggableTypes} from "../../pages/ProjectPage";
 import {Project} from "../../services/ProjectService";
 import useAuth from "../../hooks/auth/useAuth";
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from "@mui/icons-material/Close";
 
 interface IssueColumnProps {
   issues: Issue[],
@@ -19,6 +21,7 @@ interface IssueColumnProps {
 
 export default function IssueColumn({issues, statusKey, title, setAllIssues, project}: IssueColumnProps) {
   const [ownIssues, setOwnIssues] = useState<Issue[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const issuesRef = useRef<Issue[]>([]);
   issuesRef.current = issues;
 
@@ -30,8 +33,6 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, pro
   }, [issues])
 
   const handleDrop = (droppedIssue: Issue) => {
-    // console.log(`Issue ${droppedIssue.id} dropped in column ${statusKey}`);
-    // console.log(ownIssues);
     const updatedIssue = {
       ...droppedIssue,
       "status": statusKey
@@ -50,6 +51,10 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, pro
     });
   }
 
+  const handleAddIssue = () => {
+    setIsDialogOpen(true);
+  }
+
   const [{isDndOver}, drop] = useDrop(
     () => ({
         accept: DraggableTypes.ISSUE,
@@ -62,6 +67,17 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, pro
     ), []
   )
 
+  const AddIssueContainer = styled(Stack)(({ theme }) => ({
+    // color: "secondary",
+    alignItems: "center",
+    margin: "10px 16px",
+    padding: "5px",
+    color: "#626F86",
+    '&:hover': {
+      borderRadius: "2px",
+      backgroundColor: "#e0e0e0",
+    },
+  }));
 
 
   return (
@@ -76,7 +92,31 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, pro
         {ownIssues.map(issue => (
           <IssueCard issue={issue} key={issue.id} project={project} issues={issues} setIssues={setAllIssues}/>
         ))}
+
+        <AddIssueContainer direction="row" onClick={handleAddIssue}>
+          <AddIcon sx={{color: "inherit"}}/>
+          <Typography sx={{
+            marginLeft: "5px",
+            textTransform: "uppercase",
+            color: "inherit",
+            fontSize: 12
+          }}>Add an Issue</Typography>
+        </AddIssueContainer>
       </Stack>
+
+
+      <Dialog open={isDialogOpen}
+              onClose={() => setIsDialogOpen(false)}
+      >
+        <Stack sx={{minWidth: "400px", minHeight: "300px"}}>
+          <Stack direction="row" sx={{justifyContent: "end"}}>
+            <CloseIcon/>
+          </Stack>
+          <Typography>Some text I guess</Typography>
+        </Stack>
+
+
+      </Dialog>
     </Stack>
   );
 }
