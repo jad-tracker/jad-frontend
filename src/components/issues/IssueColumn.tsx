@@ -1,8 +1,7 @@
-import {Issue, Project} from "../../services/ProjectService";
-import ProjectCard from "../projects/ProjectCard";
-import {Card, CardContent, CardHeader, Stack} from "@mui/material";
+import {Issue} from "../../services/ProjectService";
+import {Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import {useDrag, useDrop} from "react-dnd";
+import {useDrop} from "react-dnd";
 import IssueCard from "./IssueCard";
 import React, {useEffect, useRef, useState} from "react";
 import {DraggableTypes} from "../../pages/ProjectPage";
@@ -23,7 +22,6 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues}: Is
   useEffect(() => {
     const filtered = issues.filter(item => item.status == statusKey);
     setOwnIssues(filtered);
-    console.log(issues);
   }, [issues])
 
   const handleDrop = (droppedIssue: Issue) => {
@@ -39,7 +37,6 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues}: Is
         return issue;
       }
     });
-    // console.log(arr);
     setAllIssues(arr);
   }
 

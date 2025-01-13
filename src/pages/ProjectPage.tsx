@@ -24,7 +24,7 @@ export default function ProjectPage() {
 
   useEffect(() => {
     const arr = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 1; i < 10; i++) {
       const mod = i % 3;
       let status = "";
       if (mod == 0) {
@@ -36,7 +36,7 @@ export default function ProjectPage() {
       }
       const issue: Issue = {
         id: i,
-        summary: "An Issue",
+        summary: "Issue",
         description: "Thing doesn't work qwq\nFind out why UwU",
         type: "TASK",
         status: status,
