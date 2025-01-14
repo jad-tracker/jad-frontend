@@ -2,7 +2,7 @@ import {useParams} from "react-router-dom";
 import ProjectMemberProvider from "../components/project-members/ProjectMemberProvider";
 import Box from "@mui/material/Box";
 import ProjectMembersView from "../components/project-members/ProjectMembersView";
-import {useContext, useEffect, useState} from "react";
+import {useContext, useEffect, useRef, useState} from "react";
 import {ProjectContext} from "../components/projects/ProjectProvider";
 import IssueColumn from "../components/issues/IssueColumn";
 import {Stack} from "@mui/material";
@@ -24,6 +24,25 @@ export default function ProjectPage() {
   const {token} = useAuth();
 
   const [issues, setIssues] = useState<Issue[]>([]);
+  const issuesRef = useRef<Issue[]>([]);
+  issuesRef.current = issues;
+
+
+
+  const handleIssueUpdate = (updatedIssue: Issue) => {
+    issueService.updateIssue(project!, updatedIssue.id, updatedIssue.summary, updatedIssue.description,
+      updatedIssue.type, updatedIssue.status, updatedIssue.date, updatedIssue.assignee, token)
+      .then(() => {
+        const arr = issuesRef.current.map(issue => {
+          if (issue.id == updatedIssue.id) {
+            return updatedIssue;
+          } else {
+            return issue;
+          }
+        });
+        setIssues(arr);
+      });
+  }
 
   useEffect(() => {
     if (project == undefined) return;
@@ -41,9 +60,9 @@ export default function ProjectPage() {
           <Stack direction="row" justifyContent="space-evenly" justifyItems="stretch" spacing={10} sx={{marginTop: "20px"}}>
           { project &&
             <>
-              <IssueColumn title="To Do" issues={issues} statusKey="TODO" setAllIssues={setIssues} project={project}/>
-              <IssueColumn title="In Progress" issues={issues} statusKey="DOING" setAllIssues={setIssues} project={project}/>
-              <IssueColumn title="Done" issues={issues} statusKey="DONE" setAllIssues={setIssues} project={project}/>
+              <IssueColumn title="To Do" issues={issues} statusKey="TODO" setAllIssues={setIssues} handleIssueUpdate={handleIssueUpdate} project={project}/>
+              <IssueColumn title="In Progress" issues={issues} statusKey="DOING" setAllIssues={setIssues} handleIssueUpdate={handleIssueUpdate} project={project}/>
+              <IssueColumn title="Done" issues={issues} statusKey="DONE" setAllIssues={setIssues} handleIssueUpdate={handleIssueUpdate}  project={project}/>
             </>
           }
           </Stack>

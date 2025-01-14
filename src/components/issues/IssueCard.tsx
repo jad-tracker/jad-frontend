@@ -14,10 +14,11 @@ interface IssueCardProps {
   issue: Issue,
   project: Project,
   issues: Issue[],
-  setIssues: React.Dispatch<React.SetStateAction<Issue[]>>
+  setIssues: React.Dispatch<React.SetStateAction<Issue[]>>,
+  clickHandler: (issue: Issue) => void,
 }
 
-export default function IssueCard({issue, project, issues, setIssues}: IssueCardProps) {
+export default function IssueCard({issue, project, issues, setIssues, clickHandler}: IssueCardProps) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: DraggableTypes.ISSUE,
     item: issue,
@@ -52,7 +53,7 @@ export default function IssueCard({issue, project, issues, setIssues}: IssueCard
   }));
 
   return (
-    <Card sx={{margin: "5px 16px", opacity: isDragging ? 0.3 : 1.0}} ref={drag}>
+    <Card sx={{margin: "5px 16px", opacity: isDragging ? 0.3 : 1.0}} ref={drag} onClick={() => clickHandler(issue)}>
       <CardContent>
         <Stack sx={{justifyContent: "space-between", minHeight: "100px"}}>
           <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>

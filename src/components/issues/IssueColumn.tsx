@@ -9,23 +9,34 @@ import {Project} from "../../services/ProjectService";
 import useAuth from "../../hooks/auth/useAuth";
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from "@mui/icons-material/Close";
+import IssueDetailDialog from "./IssueDetailDialog";
 
 interface IssueColumnProps {
   issues: Issue[],
   statusKey: string,
   title: string,
   setAllIssues: React.Dispatch<React.SetStateAction<Issue[]>>,
-  project: Project
+  handleIssueUpdate: (issue: Issue) => void,
+  project: Project,
 }
 
 
-export default function IssueColumn({issues, statusKey, title, setAllIssues, project}: IssueColumnProps) {
+export default function IssueColumn({issues, statusKey, title, setAllIssues, handleIssueUpdate, project}: IssueColumnProps) {
   const [ownIssues, setOwnIssues] = useState<Issue[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const issuesRef = useRef<Issue[]>([]);
-  issuesRef.current = issues;
 
-  const {token} = useAuth();
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const newIssue: Issue = {
+    id: -1,
+    summary: "",
+    description: "",
+    type: "",
+    status: "",
+    date: new Date(Date.now()),
+    assignee: ""
+  }
+  const [dialogIssue, setDialogIssue] = useState<Issue>(newIssue);
 
   useEffect(() => {
     const filtered = issues.filter(item => item.status == statusKey);
@@ -37,22 +48,13 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, pro
       ...droppedIssue,
       "status": statusKey
     };
-    issueService.updateIssue(project, updatedIssue.id, updatedIssue.summary, updatedIssue.description,
-      updatedIssue.type, updatedIssue.status, updatedIssue.date, updatedIssue.assignee, token)
-    .then(() => {
-      const arr = issuesRef.current.map(issue => {
-        if (issue.id == droppedIssue.id) {
-          return updatedIssue;
-        } else {
-          return issue;
-        }
-      });
-      setAllIssues(arr);
-    });
+    handleIssueUpdate(updatedIssue);
   }
 
   const handleAddIssue = () => {
+    setDialogIssue(newIssue)
     setIsDialogOpen(true);
+    setIsEditing(true);
   }
 
   const [{isDndOver}, drop] = useDrop(
@@ -67,8 +69,13 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, pro
     ), []
   )
 
+  const handleIssueClick = (issue: Issue) => {
+    setDialogIssue(issue);
+    setIsDialogOpen(true);
+    setIsEditing(false);
+  }
+
   const AddIssueContainer = styled(Stack)(({ theme }) => ({
-    // color: "secondary",
     alignItems: "center",
     margin: "10px 16px",
     padding: "5px",
@@ -90,7 +97,7 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, pro
       }}>{`${title} ${ownIssues.length}`}</Typography>
       <Stack sx={{minWidth: "300px", maxWidth: "600px", minHeight: "500px", marginTop: "10px"}} ref={drop}>
         {ownIssues.map(issue => (
-          <IssueCard issue={issue} key={issue.id} project={project} issues={issues} setIssues={setAllIssues}/>
+          <IssueCard issue={issue} key={issue.id} project={project} issues={issues} setIssues={setAllIssues} clickHandler={handleIssueClick}/>
         ))}
 
         <AddIssueContainer direction="row" onClick={handleAddIssue}>
@@ -103,20 +110,7 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, pro
           }}>Add an Issue</Typography>
         </AddIssueContainer>
       </Stack>
-
-
-      <Dialog open={isDialogOpen}
-              onClose={() => setIsDialogOpen(false)}
-      >
-        <Stack sx={{minWidth: "400px", minHeight: "300px"}}>
-          <Stack direction="row" sx={{justifyContent: "end"}}>
-            <CloseIcon/>
-          </Stack>
-          <Typography>Some text I guess</Typography>
-        </Stack>
-
-
-      </Dialog>
+      <IssueDetailDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} isEditing={isEditing} setIsEditing={setIsEditing} dialogIssue={dialogIssue} setDialogIssue={setDialogIssue} handleIssueUpdate={handleIssueUpdate}/>
     </Stack>
   );
 }
