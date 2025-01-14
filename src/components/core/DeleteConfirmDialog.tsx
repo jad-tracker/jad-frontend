@@ -1,4 +1,4 @@
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle} from "@mui/material";
+import {Button, Dialog, DialogActions, DialogContent} from "@mui/material";
 import React from "react";
 
 interface DeleteConfirmDialogProps {
@@ -9,11 +9,13 @@ interface DeleteConfirmDialogProps {
 }
 
 export default function DeleteConfirmDialog({isOpen, setIsOpen, description, onConfirm}: DeleteConfirmDialogProps) {
-  const handleCancel = () => {
+  const handleCancel = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
     setIsOpen(false);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
     onConfirm();
     setIsOpen(false);
   }
@@ -22,8 +24,8 @@ export default function DeleteConfirmDialog({isOpen, setIsOpen, description, onC
     <Dialog open={isOpen} onClose={handleCancel}>
       <DialogContent> {`Are you sure you want to delete ${description}?`}</DialogContent>
       <DialogActions>
-        <Button onClick={handleConfirm} color="error">Delete</Button>
-        <Button onClick={handleCancel}>
+        <Button onClick={e => handleConfirm(e)} color="error">Delete</Button>
+        <Button onClick={e => handleCancel(e)}>
           Cancel
         </Button>
       </DialogActions>
