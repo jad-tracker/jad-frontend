@@ -5,7 +5,7 @@ import {Project} from "./ProjectService";
 import formatDate from "../utils/DateUtils";
 
 export interface Issue {
-  id: number;
+  id: number | undefined;
   summary: string;
   description: string;
   type: string;

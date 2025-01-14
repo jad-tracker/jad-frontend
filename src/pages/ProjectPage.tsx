@@ -30,7 +30,7 @@ export default function ProjectPage() {
 
 
   const handleIssueUpdate = (updatedIssue: Issue) => {
-    issueService.updateIssue(project!, updatedIssue.id, updatedIssue.summary, updatedIssue.description,
+    issueService.updateIssue(project!, updatedIssue.id!, updatedIssue.summary, updatedIssue.description,
       updatedIssue.type, updatedIssue.status, updatedIssue.date, updatedIssue.assignee, token)
       .then(() => {
         const arr = issuesRef.current.map(issue => {
@@ -42,6 +42,15 @@ export default function ProjectPage() {
         });
         setIssues(arr);
       });
+  }
+
+  const handleIssueAdd = (issue: Issue) => {
+    issueService.createIssue(project!, issue.summary, issue.description, issue.type, issue.status,
+      issue.date, issue.assignee, token)
+    .then(() => {
+      const arr = [...issuesRef.current, issue]
+      setIssues(arr);
+    });
   }
 
   useEffect(() => {
@@ -60,9 +69,9 @@ export default function ProjectPage() {
           <Stack direction="row" justifyContent="space-evenly" justifyItems="stretch" spacing={10} sx={{marginTop: "20px"}}>
           { project &&
             <>
-              <IssueColumn title="To Do" issues={issues} statusKey="TODO" setAllIssues={setIssues} handleIssueUpdate={handleIssueUpdate} project={project}/>
-              <IssueColumn title="In Progress" issues={issues} statusKey="DOING" setAllIssues={setIssues} handleIssueUpdate={handleIssueUpdate} project={project}/>
-              <IssueColumn title="Done" issues={issues} statusKey="DONE" setAllIssues={setIssues} handleIssueUpdate={handleIssueUpdate}  project={project}/>
+              <IssueColumn title="To Do" issues={issues} statusKey="TODO" setAllIssues={setIssues} handleIssueUpdate={handleIssueUpdate} handleIssueAdd={handleIssueAdd} project={project}/>
+              <IssueColumn title="In Progress" issues={issues} statusKey="DOING" setAllIssues={setIssues} handleIssueUpdate={handleIssueUpdate} handleIssueAdd={handleIssueAdd} project={project}/>
+              <IssueColumn title="Done" issues={issues} statusKey="DONE" setAllIssues={setIssues} handleIssueUpdate={handleIssueUpdate} handleIssueAdd={handleIssueAdd} project={project}/>
             </>
           }
           </Stack>
