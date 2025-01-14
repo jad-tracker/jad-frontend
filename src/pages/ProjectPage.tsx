@@ -32,9 +32,9 @@ export default function ProjectPage() {
   const handleIssueUpdate = (updatedIssue: Issue) => {
     issueService.updateIssue(project!, updatedIssue.id!, updatedIssue.summary, updatedIssue.description,
       updatedIssue.type, updatedIssue.status, updatedIssue.date, updatedIssue.assignee, token)
-      .then(() => {
+      .then(savedIssue => {
         const arr = issuesRef.current.map(issue => {
-          if (issue.id == updatedIssue.id) {
+          if (issue.id == savedIssue.id) {
             return updatedIssue;
           } else {
             return issue;
@@ -47,8 +47,8 @@ export default function ProjectPage() {
   const handleIssueAdd = (issue: Issue) => {
     issueService.createIssue(project!, issue.summary, issue.description, issue.type, issue.status,
       issue.date, issue.assignee, token)
-    .then(() => {
-      const arr = [...issuesRef.current, issue]
+    .then(savedIssue => {
+      const arr = [...issuesRef.current, savedIssue]
       setIssues(arr);
     });
   }
