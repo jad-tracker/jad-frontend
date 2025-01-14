@@ -1,4 +1,4 @@
-import {Avatar, Card, CardContent, Stack, styled} from "@mui/material";
+import {Avatar, Card, CardContent, Chip, Stack, styled} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {Issue, issueService} from "../../services/IssueService";
 import {useDrag} from "react-dnd";
@@ -9,6 +9,9 @@ import React, {useState} from "react";
 import {avatarInitials, stringToColor} from "../../utils/AvatarUtils";
 import useAuth from "../../hooks/auth/useAuth";
 import {Project} from "../../services/ProjectService";
+import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined';
 
 interface IssueCardProps {
   issue: Issue,
@@ -32,12 +35,34 @@ export default function IssueCard({issue, project, issues, setIssues, clickHandl
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
   const handleDeleteIssue = async () => {
-    await issueService.deleteIssue(project, issue.id, token);
+    await issueService.deleteIssue(project, issue.id!, token);
     const filtered = issues.filter(iss => {
         return iss.id != issue.id;
 
       })
     setIssues(filtered);
+  }
+
+  const getIssueIcon = (issueType: string) => {
+    const comp = issueType.toUpperCase();
+    if (comp == "BUG") {
+      return <BugReportOutlinedIcon/>;
+    } else if (comp == "STORY") {
+      return <BookmarkBorderIcon/>
+    } else {
+      return <StickyNote2OutlinedIcon/>;
+    }
+  }
+
+  const getIssueColor = (issueType: string) => {
+    const comp = issueType.toUpperCase();
+    if (comp == "BUG") {
+      return "#ff7043";
+    } else if (comp == "STORY") {
+      return "#66bb6a";
+    } else {
+      return "#29b6f6";
+    }
   }
 
   const CloseButton = styled(CloseIcon)(({ theme }) => ({
@@ -52,19 +77,28 @@ export default function IssueCard({issue, project, issues, setIssues, clickHandl
     },
   }));
 
+  const CustomChip = styled(Chip)(() => ({
+    textTransform: "capitalize",
+    fontWeight: 400,
+    fontSize: 14,
+    backgroundColor: getIssueColor(issue.type),
+    color: "white",
+    "& .MuiChip-icon": {
+      color: "white",
+    },
+  }));
+
   return (
     <Card sx={{margin: "5px 16px", opacity: isDragging ? 0.3 : 1.0}} ref={drag} onClick={() => clickHandler(issue)}>
       <CardContent>
         <Stack sx={{justifyContent: "space-between", minHeight: "100px"}}>
           <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
-            <Typography sx={{fontSize: 16}}>{issue.summary} {issue.id}</Typography>
-            <CloseButton fontSize="small" onClick={() => setIsDeleteDialogOpen(true)}/>
+            <Typography sx={{fontSize: 16}}>{issue.summary}</Typography>
+            <CloseButton fontSize="small" onClick={(e) =>{e.stopPropagation(); setIsDeleteDialogOpen(true)}}/>
           </Stack>
 
           <Stack direction="row" spacing={1} sx={{justifyContent: "space-between", alignItems: "center"}}>
-            <Typography color="secondary" sx={{textTransform: "capitalize", fontWeight: 300, fontSize: 12}}>
-              {issue.type.toLowerCase()}
-            </Typography>
+            <CustomChip icon={getIssueIcon(issue.type)} label={issue.type.toLowerCase()}/>
 
             <Stack direction="row" sx={{justifyContent: "right", alignItems: "baseline"}}>
               <Avatar variant="rounded"
