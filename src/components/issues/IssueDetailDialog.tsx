@@ -48,8 +48,8 @@ export default function IssueDetailDialog({setIsDialogOpen, setIsEditing, dialog
       ...dialogIssue,
       status: event.target.value,
     };
-    setDialogIssue(iss);
     handleIssueUpdate(iss);
+    setDialogIssue(iss);
   };
 
   return (
