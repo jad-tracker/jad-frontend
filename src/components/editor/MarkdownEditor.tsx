@@ -21,18 +21,13 @@ interface MarkdownEditorProps {
 export default function MarkdownEditor({contents, diffRevision, setContents}: MarkdownEditorProps) {
   const mdxEditorRef = useRef<MDXEditorMethods>(null);
 
-  useEffect(() => {
-    if (mdxEditorRef.current === null) return;
-    mdxEditorRef.current.setMarkdown(contents);
-  }, [contents]);
 
-  const handle = (currentValue: string) => setContents(currentValue);
+  const handle = (currentValue: string) => {setContents(currentValue); }
 
   return (
-    <MDXEditor markdown={contents} ref={mdxEditorRef} onChange={handle} autoFocus={true} plugins={
+    <MDXEditor markdown={contents} ref={mdxEditorRef} onChange={handle} autoFocus={false} plugins={
       [headingsPlugin(), listsPlugin(), quotePlugin(), thematicBreakPlugin(), linkDialogPlugin(),
         linkPlugin(), imagePlugin(), tablePlugin(), markdownShortcutPlugin(),
-        codeMirrorPlugin({ codeBlockLanguages: { js: 'JavaScript', css: 'CSS' } }),
         diffSourcePlugin({
           diffMarkdown: diffRevision,
           readOnlyDiff: true,
@@ -46,7 +41,6 @@ export default function MarkdownEditor({contents, diffRevision, setContents}: Ma
             <ListsToggle/>
             <BoldItalicUnderlineToggles />
             <CodeToggle/>
-            <InsertCodeBlock/>
             <CreateLink/>
             <InsertTable/>
             <InsertImage/>

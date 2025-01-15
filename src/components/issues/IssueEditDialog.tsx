@@ -126,7 +126,7 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
   }
 
   return (
-    <Stack sx={{minWidth: "500px", minHeight: "300px", margin: "20px", justifyContent: "space-between"}}>
+    <Stack spacing={4} sx={{minWidth: "500px", minHeight: "300px", margin: "20px", justifyContent: "space-between"}}>
       <Stack spacing={4}>
         <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
           <Typography variant="h1" fontSize={24} fontWeight={400}>
