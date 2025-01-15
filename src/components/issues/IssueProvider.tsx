@@ -93,7 +93,6 @@ function issueReducer(issues: Issue[], action: IssueReducerAction): Issue[] {
       return action.payload;
     }
 
-
     case "update": {
       return issues.map(i => {
         if (i.id == action.payload.id) {
@@ -104,11 +103,9 @@ function issueReducer(issues: Issue[], action: IssueReducerAction): Issue[] {
       })
     }
 
-
     case "delete": {
       return issues.filter(i => i.id !== action.payload.id);
     }
-
 
     default: {
       throw Error(`Unknown action: ${action.type}`);

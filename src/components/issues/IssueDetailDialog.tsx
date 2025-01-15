@@ -11,16 +11,14 @@ import {
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from '@mui/icons-material/Edit';
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext} from "react";
 import {Issue, IssueStatusType} from "../../services/IssueService";
 import Box from "@mui/material/Box";
 import {avatarInitials, stringToColor} from "../../utils/AvatarUtils";
-import CommentLine from "../comments/CommentLine";
-import {commentService, Comment} from "../../services/CommentService";
-import useAuth from "../../hooks/auth/useAuth";
-import CommentEditLine from "../comments/CommentEditLine";
 import {IssueActionContext} from "./IssueProvider";
 import {CurrentProjectContext} from "../projects/CurrentProjectProvider";
+import CommentProvider from "../comments/CommentProvider";
+import CommentsContainer from "../comments/CommentsContainer";
 
 interface IssueDetailDialogProps {
   setIsDialogOpen:  React.Dispatch<React.SetStateAction<boolean>>
@@ -30,18 +28,8 @@ interface IssueDetailDialogProps {
 }
 
 export default function IssueDetailDialog({setIsDialogOpen, setIsEditing, dialogIssue, setDialogIssue}: IssueDetailDialogProps) {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const {token} = useAuth();
-
   const {updateIssue} = useContext(IssueActionContext);
   const projectId = useContext(CurrentProjectContext)!.id;
-
-  useEffect(() => {
-    commentService.getCommentsForIssue(dialogIssue, token)
-      .then(savedComments => {
-        setComments(savedComments);
-      })
-  }, []);
 
   const ExitButton = styled(CloseIcon)(() => ({
     padding: "3px",
@@ -92,15 +80,16 @@ export default function IssueDetailDialog({setIsDialogOpen, setIsEditing, dialog
             {dialogIssue.description}
           </Typography>
 
-          <Stack spacing={1} sx={{marginTop: "50px"}}>
-            <CommentEditLine/>
-            {comments.map(comment => (
-              <CommentLine comment={comment} key={comment.id}/>
-            ))}
-          </Stack>
+
+          <Typography variant="h3" fontSize={16} fontWeight={600} margin="5px" sx={{marginTop: "50px"}}>
+            Comments
+          </Typography>
+          <CommentProvider issueId={dialogIssue.id}>
+            <CommentsContainer currentIssue={dialogIssue}/>
+          </CommentProvider>
         </Box>
 
-        <Stack sx={{border: "1px solid #bdbdbd", borderRadius: "5px", padding: "10px", minWidth: "250px"}}>
+        <Stack sx={{border: "1px solid #bdbdbd", borderRadius: "5px", padding: "10px", minWidth: "250px", maxHeight: "200px"}}>
           <FormControl variant="standard" sx={{m: 1, minWidth: 120}}>
             <InputLabel id="details-dialog-status-label">Status</InputLabel>
             <Select labelId="details-dialog-status-label"

@@ -1,25 +1,23 @@
-import {Project} from "./ProjectService";
 import {apiClient} from "./ApiClient";
 import {convertError} from "./ApiError";
 import {AxiosError} from "axios";
 import formatDate from "../utils/DateUtils";
-import {Issue} from "./IssueService";
 
-export interface Comment {
-  id: number | undefined;
+export interface UserComment {
+  id: number;
   content: string;
   date: Date;
   username: string;
 }
 
 class CommentService {
-  private endpoint = (issue: Issue) => `/issues/${issue.id}/comments`;
+  private endpoint = (issueId: number) => `/issues/${issueId}/comments`;
 
 
-  public async getCommentsForIssue(issue: Issue, token: string): Promise<Comment[]> {
+  public async getCommentsForIssue(issueId: number, token: string): Promise<UserComment[]> {
     try {
       const response = await apiClient.get(
-        this.endpoint(issue),
+        this.endpoint(issueId),
         {
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -34,10 +32,10 @@ class CommentService {
   }
 
 
-  public async createComment(issue: Issue, content: string, date: Date, token: string): Promise<Comment> {
+  public async createComment(issueId: number, content: string, date: Date, token: string): Promise<UserComment> {
     try {
       const response = await apiClient.post(
-        this.endpoint(issue),
+        this.endpoint(issueId),
         {
           content,
           date: formatDate(new Date(date)),
@@ -55,10 +53,10 @@ class CommentService {
     }
   }
 
-  public async updateComment(issue: Issue, commentId: number, content: string, date: Date, token: string): Promise<Comment> {
+  public async updateComment(issueId: number, commentId: number, content: string, date: Date, token: string): Promise<UserComment> {
     try {
       const response = await apiClient.put(
-        this.endpoint(issue) + `/${commentId}`,
+        this.endpoint(issueId) + `/${commentId}`,
         {
           content,
           date: formatDate(new Date(date)),
@@ -76,10 +74,10 @@ class CommentService {
     }
   }
 
-  public async deleteComment(issue: Issue, commentId: number, token: string): Promise<void> {
+  public async deleteComment(issueId: number, commentId: number, token: string): Promise<void> {
     try {
       await apiClient.delete(
-        this.endpoint(issue) + `/${commentId}`,
+        this.endpoint(issueId) + `/${commentId}`,
         {
           headers: {
             "Authorization": `Bearer ${token}`,
