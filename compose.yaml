@@ -1,0 +1,51 @@
+name: jad-tracker
+
+services:
+  frontend:
+    build:
+      context: .
+      target: final
+    depends_on:
+      - backend
+    networks:
+      - frontend-network
+    ports:
+      - "8081:80"
+
+  backend:
+    build:
+      context: ../jad-backend/
+      target: final
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - frontend-network
+      - backend-network
+    ports:
+      - "8080:8080"
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: jadtracker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+    ports:
+      - "7071:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d jadtracker"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+volumes:
+  postgres_data:
+
+networks:
+  backend-network:
+  frontend-network:
