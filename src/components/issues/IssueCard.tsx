@@ -29,7 +29,7 @@ export default function IssueCard({issue, project, clickHandler}: IssueCardProps
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
     })
-  }))
+  }), [issue])
 
   const getIssueIcon = (issueType: string) => {
     const comp = issueType.toUpperCase();
