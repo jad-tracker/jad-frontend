@@ -40,15 +40,18 @@ export default function AppNavBar({disableLogout = false}: AppNavBarProps) {
         >
           JadTracker
         </Typography>
-        <Box sx={{ flexGrow: 1, display: 'flex' }}>
-          <Button
-            component={RouterLink}
-            to="/projects"
-            sx={{my: 2, color: 'inherit', display: 'block'}}
-          >
-            Projects
-          </Button>
-        </Box>
+        { !disableLogout &&
+          <Box sx={{ flexGrow: 1, display: 'flex' }}>
+            <Button
+              component={RouterLink}
+              to="/projects"
+              sx={{my: 2, color: 'inherit', display: 'block'}}
+            >
+              Projects
+            </Button>
+          </Box>
+        }
+
         {!disableLogout && (
           <Box sx={{ flexGrow: 0 }}>
             <Button

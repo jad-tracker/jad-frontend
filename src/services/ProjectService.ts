@@ -15,6 +15,7 @@ export interface ProjectMember {
   role: string;
 }
 
+
 class ProjectService {
   private endpoint = "/projects";
 
