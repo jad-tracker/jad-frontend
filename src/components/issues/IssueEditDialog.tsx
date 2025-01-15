@@ -11,29 +11,31 @@ import {
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import React, {useContext, useState} from "react";
-import {Issue} from "../../services/IssueService";
+import {Issue, IssueStatusType, IssueTypeType} from "../../services/IssueService";
 import {avatarInitials, stringToColor} from "../../utils/AvatarUtils";
 import {ProjectMemberContext} from "../project-members/ProjectMemberProvider";
+import {IssueActionContext} from "./IssueProvider";
+import {CurrentProjectContext} from "../projects/CurrentProjectProvider";
 
 interface IssueDetailDialogProps {
   setIsDialogOpen:  React.Dispatch<React.SetStateAction<boolean>>
   setIsEditing:  React.Dispatch<React.SetStateAction<boolean>>
-  handleIssueUpdate: (issue: Issue) => void;
-  handleIssueAdd: (issue: Issue) => void;
   dialogIssue: Issue;
   setDialogIssue: React.Dispatch<React.SetStateAction<Issue>>;
   isCreating: boolean;
   setIsCreating: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIssue, setDialogIssue, isCreating, setIsCreating, handleIssueUpdate, handleIssueAdd}: IssueDetailDialogProps) {
+export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIssue, setDialogIssue, isCreating, setIsCreating}: IssueDetailDialogProps) {
   const [editSummary, setEditSummary] = useState<string>(dialogIssue.summary);
-  const [editStatus, setEditStatus] = useState<string>(dialogIssue.status);
-  const [editType, setEditType] = useState<string>(dialogIssue.type);
+  const [editStatus, setEditStatus] = useState<IssueStatusType>(dialogIssue.status);
+  const [editType, setEditType] = useState<IssueTypeType>(dialogIssue.type);
   const [editDescription, setEditDescription] = useState<string>(dialogIssue.description);
   const [editAssignee, setEditAssignee] = useState<string>(dialogIssue.assignee);
 
   const {members: projectMembers} = useContext(ProjectMemberContext);
+  const {addIssue, updateIssue} = useContext(IssueActionContext);
+  const projectId = useContext(CurrentProjectContext)!.id;
 
   const ExitButton = styled(CloseIcon)(() => ({
     padding: "3px",
@@ -45,10 +47,10 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
   }));
 
   const handleSave = () => {
-    let newIssue: Issue;
+    let issue: Issue;
     if (isCreating) {
-      newIssue = {
-        id: undefined,
+      issue = {
+        id: -1,
         date: new Date(Date.now()),
         assignee: editAssignee,
         summary: editSummary,
@@ -56,9 +58,9 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
         type: editType,
         description: editDescription
       };
-      handleIssueAdd(newIssue);
+      addIssue(projectId, issue);
     } else {
-      newIssue = {
+      issue = {
         ...dialogIssue,
         assignee: editAssignee,
         summary: editSummary,
@@ -66,10 +68,10 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
         type: editType,
         description: editDescription
       };
-      handleIssueUpdate(newIssue);
+      updateIssue(projectId, issue);
     }
 
-    setDialogIssue(newIssue);
+    setDialogIssue(issue);
     setIsEditing(false);
     if (isCreating) {
       setIsCreating(false);
@@ -107,7 +109,7 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
               <InputLabel id="details-dialog-status-label">Status</InputLabel>
               <Select labelId="details-dialog-status-label"
                       value={editStatus}
-                      onChange={e => setEditStatus(e.target.value)}
+                      onChange={e => setEditStatus(e.target.value as IssueStatusType)}
               >
                 <MenuItem value="TODO">To Do</MenuItem>
                 <MenuItem value="DOING">In Progress</MenuItem>
@@ -116,7 +118,7 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
             </FormControl>
 
             <FormControl variant="standard" sx={{m: 1, minWidth: 200}}>
-              <InputLabel id="details-dialog-assignee-label">Type</InputLabel>
+              <InputLabel id="details-dialog-assignee-label">Assignee</InputLabel>
               <Select labelId="details-dialog-assignee-label"
                       value={editAssignee}
                       onChange={e => setEditAssignee(e.target.value)}
@@ -143,7 +145,7 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
               <InputLabel id="details-dialog-type-label">Type</InputLabel>
               <Select labelId="details-dialog-type-label"
                       value={editType}
-                      onChange={e => setEditType(e.target.value)}
+                      onChange={e => setEditType(e.target.value as IssueTypeType)}
               >
                 <MenuItem value="STORY">Story</MenuItem>
                 <MenuItem value="TASK">Task</MenuItem>

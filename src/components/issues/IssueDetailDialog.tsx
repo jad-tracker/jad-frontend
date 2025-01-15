@@ -11,20 +11,38 @@ import {
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from '@mui/icons-material/Edit';
-import React from "react";
-import {Issue} from "../../services/IssueService";
+import React, {useContext, useEffect, useState} from "react";
+import {Issue, IssueStatusType} from "../../services/IssueService";
 import Box from "@mui/material/Box";
 import {avatarInitials, stringToColor} from "../../utils/AvatarUtils";
+import CommentLine from "../comments/CommentLine";
+import {commentService, Comment} from "../../services/CommentService";
+import useAuth from "../../hooks/auth/useAuth";
+import CommentEditLine from "../comments/CommentEditLine";
+import {IssueActionContext} from "./IssueProvider";
+import {CurrentProjectContext} from "../projects/CurrentProjectProvider";
 
 interface IssueDetailDialogProps {
   setIsDialogOpen:  React.Dispatch<React.SetStateAction<boolean>>
   setIsEditing:  React.Dispatch<React.SetStateAction<boolean>>
-  handleIssueUpdate: (issue: Issue) => void;
   dialogIssue: Issue;
   setDialogIssue:  React.Dispatch<React.SetStateAction<Issue>>;
 }
 
-export default function IssueDetailDialog({setIsDialogOpen, setIsEditing, dialogIssue, setDialogIssue, handleIssueUpdate}: IssueDetailDialogProps) {
+export default function IssueDetailDialog({setIsDialogOpen, setIsEditing, dialogIssue, setDialogIssue}: IssueDetailDialogProps) {
+  const [comments, setComments] = useState<Comment[]>([]);
+  const {token} = useAuth();
+
+  const {updateIssue} = useContext(IssueActionContext);
+  const projectId = useContext(CurrentProjectContext)!.id;
+
+  useEffect(() => {
+    commentService.getCommentsForIssue(dialogIssue, token)
+      .then(savedComments => {
+        setComments(savedComments);
+      })
+  }, []);
+
   const ExitButton = styled(CloseIcon)(() => ({
     padding: "3px",
     fontSize: "2em",
@@ -44,12 +62,12 @@ export default function IssueDetailDialog({setIsDialogOpen, setIsEditing, dialog
   }))
 
   const handleStatusChange = (event: SelectChangeEvent) => {
-    const iss = {
+    const issue = {
       ...dialogIssue,
-      status: event.target.value,
+      status: event.target.value as IssueStatusType,
     };
-    handleIssueUpdate(iss);
-    setDialogIssue(iss);
+    updateIssue(projectId, issue);
+    setDialogIssue(issue);
   };
 
   return (
@@ -73,6 +91,13 @@ export default function IssueDetailDialog({setIsDialogOpen, setIsEditing, dialog
                       sx={{border: "1px solid #bdbdbd", borderRadius: "5px", padding: "10px", minWidth: "350px"}}>
             {dialogIssue.description}
           </Typography>
+
+          <Stack spacing={1} sx={{marginTop: "50px"}}>
+            <CommentEditLine/>
+            {comments.map(comment => (
+              <CommentLine comment={comment} key={comment.id}/>
+            ))}
+          </Stack>
         </Box>
 
         <Stack sx={{border: "1px solid #bdbdbd", borderRadius: "5px", padding: "10px", minWidth: "250px"}}>

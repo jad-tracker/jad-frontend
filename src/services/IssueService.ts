@@ -1,27 +1,37 @@
 import {apiClient} from "./ApiClient";
 import {convertError} from "./ApiError";
 import {AxiosError} from "axios";
-import {Project} from "./ProjectService";
 import formatDate from "../utils/DateUtils";
 
+export type IssueStatusType = "TODO" | "DOING" | "DONE";
+export type IssueTypeType = "STORY" | "TASK" | "BUG";
+
 export interface Issue {
-  id: number | undefined;
+  id: number;
   summary: string;
   description: string;
-  type: string;
-  status: string;
+  type: IssueTypeType;
+  status: IssueStatusType;
   date: Date;
   assignee: string;
 }
 
+export function mapIssueStatus(status: IssueStatusType): string {
+  switch(status){
+    case "TODO": return "To Do";
+    case "DOING": return "In Progress";
+    case "DONE": return "Done";
+  }
+}
+
 class IssueService {
-  private endpoint = (project: Project) => `/projects/${project.id}/issues`;
+  private endpoint = (projectId: number) => `/projects/${projectId}/issues`;
 
 
-  public async getIssuesForProject(project: Project, token: string): Promise<Issue[]> {
+  public async getIssuesForProject(projectId: number, token: string): Promise<Issue[]> {
     try {
       const response = await apiClient.get(
-        this.endpoint(project),
+        this.endpoint(projectId),
         {
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -36,11 +46,11 @@ class IssueService {
   }
 
 
-  public async createIssue(project: Project, summary: string, description: string,
+  public async createIssue(projectId: number, summary: string, description: string,
                            type: string, status: string, date: Date, assignee: string, token: string): Promise<Issue> {
     try {
       const response = await apiClient.post(
-        this.endpoint(project),
+        this.endpoint(projectId),
         {
           summary,
           description,
@@ -62,11 +72,11 @@ class IssueService {
     }
   }
 
-  public async updateIssue(project: Project, issueId: number, summary: string, description: string,
+  public async updateIssue(projectId: number, issueId: number, summary: string, description: string,
                            type: string, status: string, date: Date, assignee: string, token: string): Promise<Issue> {
     try {
       const response = await apiClient.put(
-        this.endpoint(project) + `/${issueId}`,
+        this.endpoint(projectId) + `/${issueId}`,
         {
           summary,
           description,
@@ -88,10 +98,10 @@ class IssueService {
     }
   }
 
-  public async deleteIssue(project: Project, issueId: number, token: string): Promise<void> {
+  public async deleteIssue(projectId: number, issueId: number, token: string): Promise<void> {
     try {
       await apiClient.delete(
-        this.endpoint(project) + `/${issueId}`,
+        this.endpoint(projectId) + `/${issueId}`,
         {
           headers: {
             "Authorization": `Bearer ${token}`,

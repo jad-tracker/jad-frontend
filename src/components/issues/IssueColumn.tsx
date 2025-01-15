@@ -1,54 +1,53 @@
-import {Issue} from "../../services/IssueService";
+import {Issue, IssueStatusType, mapIssueStatus} from "../../services/IssueService";
 import {Stack, styled} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {useDrop} from "react-dnd";
 import IssueCard from "./IssueCard";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {DraggableTypes} from "../../pages/ProjectPage";
 import {Project} from "../../services/ProjectService";
 import AddIcon from '@mui/icons-material/Add';
 import IssueDialog from "./IssueDialog";
+import {IssueActionContext, IssueContext} from "./IssueProvider";
 
 interface IssueColumnProps {
-  issues: Issue[],
-  statusKey: string,
-  title: string,
-  setAllIssues: React.Dispatch<React.SetStateAction<Issue[]>>,
-  handleIssueUpdate: (issue: Issue) => void,
-  handleIssueAdd: (issue: Issue) => void,
+  status: IssueStatusType,
   project: Project,
 }
 
 
-export default function IssueColumn({issues, statusKey, title, setAllIssues, handleIssueUpdate, handleIssueAdd, project}: IssueColumnProps) {
+export default function IssueColumn({status, project}: IssueColumnProps) {
   const [ownIssues, setOwnIssues] = useState<Issue[]>([]);
 
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isCreating, setIsCreating] = useState<boolean>(false);
 
+  const issues = useContext(IssueContext);
+  const {updateIssue} = useContext(IssueActionContext);
+
   const newIssue: Issue = {
     id: -1,
     summary: "",
     description: "",
-    type: "",
-    status: "",
+    type: "STORY",
+    status: status,
     date: new Date(Date.now()),
     assignee: ""
   }
   const [dialogIssue, setDialogIssue] = useState<Issue>(newIssue);
 
   useEffect(() => {
-    const filtered = issues.filter(item => item.status == statusKey);
+    const filtered = issues.filter(item => item.status == status);
     setOwnIssues(filtered);
   }, [issues])
 
   const handleDrop = (droppedIssue: Issue) => {
     const updatedIssue = {
       ...droppedIssue,
-      "status": statusKey
+      "status": status
     };
-    handleIssueUpdate(updatedIssue);
+    updateIssue(project.id, updatedIssue);
   }
 
   const openAddIssueDialog = () => {
@@ -64,12 +63,11 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, han
     setIsEditing(false);
   }
 
-  const [{isDndOver}, drop] = useDrop(
+  const [, drop] = useDrop(
     () => ({
         accept: DraggableTypes.ISSUE,
         drop: (issue: Issue) => handleDrop(issue),
         collect: monitor => ({
-          // Show a IssueCard skeleton if the user is dragging an IssueCard over this column
           isDndOver: monitor.isOver()
         })
       }
@@ -87,7 +85,6 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, han
     },
   }));
 
-
   return (
     <Stack sx={{backgroundColor: "#F7F8F9", borderRadius: "5px", paddingTop: "10px"}}>
       <Typography sx={{
@@ -95,10 +92,13 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, han
         textTransform: "uppercase",
         color: "#626F86",
         fontSize: 12
-      }}>{`${title} ${ownIssues.length}`}</Typography>
+      }}>
+        {`${mapIssueStatus(status)} ${ownIssues.length}`}
+      </Typography>
+
       <Stack sx={{minWidth: "300px", maxWidth: "600px", minHeight: "500px", marginTop: "10px"}} ref={drop}>
         {ownIssues.map(issue => (
-          <IssueCard issue={issue} key={issue.id} project={project} issues={issues} setIssues={setAllIssues} clickHandler={openEditIssueDialog}/>
+          <IssueCard issue={issue} key={issue.id} project={project} clickHandler={openEditIssueDialog}/>
         ))}
 
         <AddIssueContainer direction="row" onClick={openAddIssueDialog}>
@@ -113,8 +113,7 @@ export default function IssueColumn({issues, statusKey, title, setAllIssues, han
       </Stack>
       <IssueDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} isEditing={isEditing}
                    setIsEditing={setIsEditing} dialogIssue={dialogIssue} setDialogIssue={setDialogIssue}
-                   isCreating={isCreating} setIsCreating={setIsCreating}
-                   handleIssueUpdate={handleIssueUpdate} handleIssueAdd={handleIssueAdd}/>
+                   isCreating={isCreating} setIsCreating={setIsCreating}/>
     </Stack>
   );
 }

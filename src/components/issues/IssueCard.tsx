@@ -1,27 +1,28 @@
 import {Avatar, Card, CardContent, Chip, Stack, styled} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import {Issue, issueService} from "../../services/IssueService";
+import {Issue} from "../../services/IssueService";
 import {useDrag} from "react-dnd";
 import {DraggableTypes} from "../../pages/ProjectPage";
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteConfirmDialog from "../core/DeleteConfirmDialog";
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import {avatarInitials, stringToColor} from "../../utils/AvatarUtils";
-import useAuth from "../../hooks/auth/useAuth";
 import {Project} from "../../services/ProjectService";
 import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined';
+import {IssueActionContext} from "./IssueProvider";
 
 interface IssueCardProps {
   issue: Issue,
   project: Project,
-  issues: Issue[],
-  setIssues: React.Dispatch<React.SetStateAction<Issue[]>>,
   clickHandler: (issue: Issue) => void,
 }
 
-export default function IssueCard({issue, project, issues, setIssues, clickHandler}: IssueCardProps) {
+export default function IssueCard({issue, project, clickHandler}: IssueCardProps) {
+  const {deleteIssue} = useContext(IssueActionContext);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+
   const [{ isDragging }, drag] = useDrag(() => ({
     type: DraggableTypes.ISSUE,
     item: issue,
@@ -29,19 +30,6 @@ export default function IssueCard({issue, project, issues, setIssues, clickHandl
       isDragging: monitor.isDragging()
     })
   }))
-
-  const {token} = useAuth();
-
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
-
-  const handleDeleteIssue = async () => {
-    await issueService.deleteIssue(project, issue.id!, token);
-    const filtered = issues.filter(iss => {
-        return iss.id != issue.id;
-
-      })
-    setIssues(filtered);
-  }
 
   const getIssueIcon = (issueType: string) => {
     const comp = issueType.toUpperCase();
@@ -94,7 +82,10 @@ export default function IssueCard({issue, project, issues, setIssues, clickHandl
         <Stack sx={{justifyContent: "space-between", minHeight: "100px"}}>
           <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
             <Typography sx={{fontSize: 16}}>{issue.summary}</Typography>
-            <CloseButton fontSize="small" onClick={(e) =>{e.stopPropagation(); setIsDeleteDialogOpen(true)}}/>
+            <CloseButton fontSize="small" onClick={(e) => {
+              e.stopPropagation();
+              setIsDeleteDialogOpen(true)
+            }}/>
           </Stack>
 
           <Stack direction="row" spacing={1} sx={{justifyContent: "space-between", alignItems: "center"}}>
@@ -113,7 +104,8 @@ export default function IssueCard({issue, project, issues, setIssues, clickHandl
         </Stack>
       </CardContent>
       <DeleteConfirmDialog isOpen={isDeleteDialogOpen} setIsOpen={setIsDeleteDialogOpen}
-                           description={`the issue "${issue.summary}"`} onConfirm={handleDeleteIssue}/>
+                           description={`the issue "${issue.summary}"`}
+                           onConfirm={() => deleteIssue(project.id, issue)}/>
     </Card>
   );
 }
