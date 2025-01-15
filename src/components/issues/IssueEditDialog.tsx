@@ -40,7 +40,11 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
 
   const {members: projectMembers} = useContext(ProjectMemberContext);
   const {addIssue, updateIssue} = useContext(IssueActionContext);
-  const projectId = useContext(CurrentProjectContext)!.id;
+  const project = useContext(CurrentProjectContext)!;
+  const projectId = project.id;
+
+  const memberUsernames = projectMembers!.map(member => member.username);
+  const assigneeChoices = [...memberUsernames, project.lead];
 
   const ExitButton = styled(CloseIcon)(() => ({
     padding: "3px",
@@ -51,8 +55,19 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
     },
   }));
 
-  const CustomAlert = styled(Alert)(() => ({
-  }))
+  const handleExit = () => {
+    setIsEditing(false);
+    if (isCreating) {
+      setIsCreating(false);
+      setIsDialogOpen(false);
+    }
+  }
+
+  const handleCancelClick =  (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    setIsEditing(false);
+    handleExit();
+  }
 
   const handleSummaryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setEditSummary(e.target.value)
@@ -106,11 +121,7 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
     }
 
     setDialogIssue(issue);
-    setIsEditing(false);
-    if (isCreating) {
-      setIsCreating(false);
-      setIsDialogOpen(false);
-    }
+    handleExit();
   }
 
   return (
@@ -155,15 +166,15 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
                       onChange={e => {setEditAssignee(e.target.value); setAssigneeError(false)}}
               >
                 {
-                  projectMembers?.map(member => {
+                  assigneeChoices.map(username => {
                     return (
-                      <MenuItem value={member.username} key={member.userId}>
+                      <MenuItem value={username} key={username}>
                         <Stack direction="row" spacing={1} sx={{alignItems: "baseline"}}>
                           <Avatar variant="rounded"
-                                  sx={{bgcolor: stringToColor(member.username), width: "25px", height: "25px", fontSize: "small"}}>
-                            {avatarInitials(member.username)}
+                                  sx={{bgcolor: stringToColor(username), width: "25px", height: "25px", fontSize: "small"}}>
+                            {avatarInitials(username)}
                           </Avatar>
-                          <Typography>{member.username}</Typography>
+                          <Typography>{username}</Typography>
                         </Stack>
 
                       </MenuItem>)
@@ -187,16 +198,16 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
         </Stack>
       </Stack>
 
-      <Stack spacing={2} marginTop={"20px"}>
-        {summaryError &&  <CustomAlert severity="error">Invalid summary</CustomAlert>}
-        {descriptionError && <CustomAlert severity="error">Invalid description</CustomAlert>}
-        {assigneeError && <CustomAlert severity="error">Invalid assignee</CustomAlert>}
+      <Stack spacing={2} margin={"20px 0"}>
+        {summaryError &&  <Alert severity="error" sx={{maxHeight: "50px"}}>Invalid summary</Alert>}
+        {descriptionError && <Alert severity="error">Invalid description</Alert>}
+        {assigneeError && <Alert severity="error">Invalid assignee</Alert>}
       </Stack>
 
       <DialogActions sx={{justifySelf: "flex-end"}}>
         <Button color="primary" variant="contained" onClick={handleSave}>Save</Button>
         <Button sx={{color: "#9e9e9e", borderColor: "#9e9e9e"}} variant="outlined"
-                onClick={() => setIsEditing(false)}>Cancel</Button>
+                onClick={handleCancelClick}>Cancel</Button>
       </DialogActions>
     </Stack>
   );

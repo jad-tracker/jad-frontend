@@ -25,7 +25,6 @@ export default function IssueDialog({isDialogOpen, setIsDialogOpen, isEditing, s
       "& .MuiPaper-root": {
         width: "100%",
         maxWidth: "800px",
-        margin: "50px",
       },
     },
   }))
