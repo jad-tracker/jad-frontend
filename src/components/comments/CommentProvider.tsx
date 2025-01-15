@@ -1,7 +1,6 @@
 import {createContext, ReactNode, useEffect, useReducer} from "react";
 import {UserComment, commentService} from "../../services/CommentService";
 import useAuth from "../../hooks/auth/useAuth";
-import {IssueActionContext, IssueContext} from "../issues/IssueProvider";
 
 interface CommentProviderProps {
   issueId: number,
