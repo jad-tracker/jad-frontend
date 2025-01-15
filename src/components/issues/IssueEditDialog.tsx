@@ -1,4 +1,5 @@
 import {
+  Alert,
   Avatar, Button,
   DialogActions,
   FormControl,
@@ -11,7 +12,7 @@ import {
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import React, {useContext, useState} from "react";
-import {Issue, IssueStatusType, IssueTypeType} from "../../services/IssueService";
+import {Issue, IssueStatusType, IssueTypeType, isValidIssue} from "../../services/IssueService";
 import {avatarInitials, stringToColor} from "../../utils/AvatarUtils";
 import {ProjectMemberContext} from "../project-members/ProjectMemberProvider";
 import {IssueActionContext} from "./IssueProvider";
@@ -33,6 +34,10 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
   const [editDescription, setEditDescription] = useState<string>(dialogIssue.description);
   const [editAssignee, setEditAssignee] = useState<string>(dialogIssue.assignee);
 
+  const [summaryError, setSummaryError] = useState<boolean>(false);
+  const [descriptionError, setDescriptionError] = useState<boolean>(false);
+  const [assigneeError, setAssigneeError] = useState<boolean>(false);
+
   const {members: projectMembers} = useContext(ProjectMemberContext);
   const {addIssue, updateIssue} = useContext(IssueActionContext);
   const projectId = useContext(CurrentProjectContext)!.id;
@@ -46,6 +51,19 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
     },
   }));
 
+  const CustomAlert = styled(Alert)(() => ({
+  }))
+
+  const handleSummaryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditSummary(e.target.value)
+    setSummaryError(false);
+  }
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditDescription(e.target.value)
+    setDescriptionError(false);
+  }
+
   const handleSave = () => {
     let issue: Issue;
     if (isCreating) {
@@ -58,6 +76,14 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
         type: editType,
         description: editDescription
       };
+
+      if (!isValidIssue(issue)) {
+        if (editSummary.length == 0) setSummaryError(true);
+        if (editDescription.length == 0) setDescriptionError(true);
+        if (editAssignee.length == 0) setAssigneeError(true);
+        return;
+      }
+
       addIssue(projectId, issue);
     } else {
       issue = {
@@ -68,6 +94,14 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
         type: editType,
         description: editDescription
       };
+
+      if (!isValidIssue(issue)) {
+        if (editSummary.length == 0) setSummaryError(true);
+        if (editDescription.length == 0) setDescriptionError(true);
+        if (editAssignee.length == 0) setAssigneeError(true);
+        return;
+      }
+
       updateIssue(projectId, issue);
     }
 
@@ -84,7 +118,7 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
       <Stack spacing={4}>
         <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
           <Typography variant="h1" fontSize={24} fontWeight={400}>
-            Edit Issue
+            {isCreating ? "Create Issue" : "Edit Issue"}
           </Typography>
 
           <Stack direction="row" spacing={1}>
@@ -93,14 +127,11 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
         </Stack>
         <Stack direction="row" sx={{justifyContent: "space-between"}}>
           <Stack spacing={2}>
-            <TextField label="Issue Summary" size="medium" sx={{minWidth: "350px"}} value={editSummary}
-                       onChange={e => setEditSummary(e.target.value)}/>
-            <TextField multiline value={editDescription}
-                       onChange={e => setEditDescription(e.target.value)}
-                       label="Description"
-                       variant="outlined"
-                       minRows={4}
-                       sx={{minWidth: "350px"}}
+            <TextField label="Issue Summary" size="medium" sx={{minWidth: "350px"}} value={editSummary} required={true}
+                       onChange={handleSummaryChange} error={summaryError}/>
+            <TextField multiline value={editDescription} error={descriptionError}
+                       onChange={handleDescriptionChange}
+                       label="Description" variant="outlined" minRows={4} required={true} sx={{minWidth: "350px"}}
             />
           </Stack>
 
@@ -120,8 +151,8 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
             <FormControl variant="standard" sx={{m: 1, minWidth: 200}}>
               <InputLabel id="details-dialog-assignee-label">Assignee</InputLabel>
               <Select labelId="details-dialog-assignee-label"
-                      value={editAssignee}
-                      onChange={e => setEditAssignee(e.target.value)}
+                      value={editAssignee} error={assigneeError}
+                      onChange={e => {setEditAssignee(e.target.value); setAssigneeError(false)}}
               >
                 {
                   projectMembers?.map(member => {
@@ -155,6 +186,13 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
           </Stack>
         </Stack>
       </Stack>
+
+      <Stack spacing={2} marginTop={"20px"}>
+        {summaryError &&  <CustomAlert severity="error">Invalid summary</CustomAlert>}
+        {descriptionError && <CustomAlert severity="error">Invalid description</CustomAlert>}
+        {assigneeError && <CustomAlert severity="error">Invalid assignee</CustomAlert>}
+      </Stack>
+
       <DialogActions sx={{justifySelf: "flex-end"}}>
         <Button color="primary" variant="contained" onClick={handleSave}>Save</Button>
         <Button sx={{color: "#9e9e9e", borderColor: "#9e9e9e"}} variant="outlined"

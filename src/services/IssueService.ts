@@ -24,6 +24,15 @@ export function mapIssueStatus(status: IssueStatusType): string {
   }
 }
 
+export function isValidIssue(issue: Issue): boolean {
+  if (issue.summary.length == 0) return false;
+  if (issue.description.length == 0) return false;
+  if (issue.assignee.length == 0) return false;
+  if (issue.type != "BUG" && issue.type != "TASK" && issue.type != "STORY") return false;
+  if (issue.status != "TODO" && issue.status != "DOING" && issue.status != "DONE") return false;
+  return true;
+}
+
 class IssueService {
   private endpoint = (projectId: number) => `/projects/${projectId}/issues`;
 
