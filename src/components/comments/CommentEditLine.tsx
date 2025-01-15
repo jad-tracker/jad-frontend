@@ -69,10 +69,6 @@ export default function CommentEditLine({comment, currentIssue, setIsEditing}: C
       </Stack>
 
       <TextField multiline minRows={2} value={contents} onChange={handleChange}/>
-      {/*<Typography variant="body1" whiteSpace="pre-wrap"*/}
-      {/*            sx={{minWidth: "350px", overflowWrap: "break-word", fontWeight: 400}}>*/}
-      {/*  {comment.content}*/}
-      {/*</Typography>*/}
       {
         (username == comment.username) &&
           <Stack direction="row" sx={{justifyContent: "end"}}>

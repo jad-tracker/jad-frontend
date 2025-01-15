@@ -17,6 +17,7 @@ import {avatarInitials, stringToColor} from "../../utils/AvatarUtils";
 import {ProjectMemberContext} from "../project-members/ProjectMemberProvider";
 import {IssueActionContext} from "./IssueProvider";
 import {CurrentProjectContext} from "../projects/CurrentProjectProvider";
+import MarkdownEditor from "../editor/MarkdownEditor";
 
 interface IssueDetailDialogProps {
   setIsDialogOpen:  React.Dispatch<React.SetStateAction<boolean>>
@@ -140,10 +141,7 @@ export default function IssueEditDialog({setIsDialogOpen, setIsEditing, dialogIs
           <Stack spacing={2}>
             <TextField label="Issue Summary" size="medium" sx={{minWidth: "350px"}} value={editSummary} required={true}
                        onChange={handleSummaryChange} error={summaryError}/>
-            <TextField multiline value={editDescription} error={descriptionError}
-                       onChange={handleDescriptionChange}
-                       label="Description" variant="outlined" minRows={4} required={true} sx={{minWidth: "350px"}}
-            />
+            <MarkdownEditor contents={editDescription} diffRevision={dialogIssue.description} setContents={setEditDescription}/>
           </Stack>
 
           <Stack>

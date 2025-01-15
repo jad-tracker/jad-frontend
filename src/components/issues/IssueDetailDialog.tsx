@@ -19,6 +19,7 @@ import {IssueActionContext} from "./IssueProvider";
 import {CurrentProjectContext} from "../projects/CurrentProjectProvider";
 import CommentProvider from "../comments/CommentProvider";
 import CommentsContainer from "../comments/CommentsContainer";
+import MarkdownViewer from "../editor/MarkdownViewer";
 
 interface IssueDetailDialogProps {
   setIsDialogOpen:  React.Dispatch<React.SetStateAction<boolean>>
@@ -75,10 +76,11 @@ export default function IssueDetailDialog({setIsDialogOpen, setIsEditing, dialog
           <Typography variant="h3" fontSize={16} fontWeight={600} margin="5px">
             Description
           </Typography>
-          <Typography variant="body1" whiteSpace="break-spaces"
-                      sx={{border: "1px solid #bdbdbd", borderRadius: "5px", padding: "10px", minWidth: "350px"}}>
-            {dialogIssue.description}
-          </Typography>
+          {/*<Typography variant="body1" whiteSpace="break-spaces"*/}
+          {/*            sx={{border: "1px solid #bdbdbd", borderRadius: "5px", padding: "10px", minWidth: "350px"}}>*/}
+          {/*  {dialogIssue.description}*/}
+          {/*</Typography>*/}
+          <MarkdownViewer contents={dialogIssue.description}/>
 
 
           <Typography variant="h3" fontSize={16} fontWeight={600} margin="5px" sx={{marginTop: "50px"}}>
