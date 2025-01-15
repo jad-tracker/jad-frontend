@@ -23,8 +23,9 @@ export default function IssueDialog({isDialogOpen, setIsDialogOpen, isEditing, s
   const LargeDialog = styled(Dialog)(() => ({
     "& .MuiDialog-container": {
       "& .MuiPaper-root": {
-        width: "100%",
-        maxWidth: "1000px",
+        width: "70%",
+        minWidth: "700px",
+        maxWidth: "stretch"
       },
     },
   }))

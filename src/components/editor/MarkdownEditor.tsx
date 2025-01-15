@@ -1,14 +1,14 @@
 import {
-  BoldItalicUnderlineToggles, CodeToggle, CreateLink, diffSourcePlugin, DiffSourceToggleWrapper,
+  BoldItalicUnderlineToggles, codeMirrorPlugin, CodeToggle, CreateLink, diffSourcePlugin, DiffSourceToggleWrapper,
   headingsPlugin, imagePlugin, InsertCodeBlock, InsertImage, InsertTable, linkDialogPlugin, linkPlugin,
   listsPlugin, ListsToggle, markdownShortcutPlugin,
   MDXEditor, MDXEditorMethods,
-  quotePlugin, setMarkdown$, tablePlugin,
+  quotePlugin, tablePlugin,
   thematicBreakPlugin,
   toolbarPlugin, UndoRedo
 } from "@mdxeditor/editor";
 import '@mdxeditor/editor/style.css'
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef} from "react";
 
 import "./editor.css"
 
@@ -32,10 +32,10 @@ export default function MarkdownEditor({contents, diffRevision, setContents}: Ma
     <MDXEditor markdown={contents} ref={mdxEditorRef} onChange={handle} autoFocus={true} plugins={
       [headingsPlugin(), listsPlugin(), quotePlugin(), thematicBreakPlugin(), linkDialogPlugin(),
         linkPlugin(), imagePlugin(), tablePlugin(), markdownShortcutPlugin(),
+        codeMirrorPlugin({ codeBlockLanguages: { js: 'JavaScript', css: 'CSS' } }),
         diffSourcePlugin({
           diffMarkdown: diffRevision,
           readOnlyDiff: true,
-          viewMode: "source"
         }),
 
       toolbarPlugin({

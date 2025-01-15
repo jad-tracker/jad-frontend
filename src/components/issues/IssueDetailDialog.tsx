@@ -71,15 +71,11 @@ export default function IssueDetailDialog({setIsDialogOpen, setIsEditing, dialog
         </Stack>
       </Stack>
 
-      <Stack direction="row" sx={{justifyContent: "space-between"}}>
+      <Stack direction="row" spacing={4} sx={{justifyContent: "space-between"}}>
         <Box>
           <Typography variant="h3" fontSize={16} fontWeight={600} margin="5px">
             Description
           </Typography>
-          {/*<Typography variant="body1" whiteSpace="break-spaces"*/}
-          {/*            sx={{border: "1px solid #bdbdbd", borderRadius: "5px", padding: "10px", minWidth: "350px"}}>*/}
-          {/*  {dialogIssue.description}*/}
-          {/*</Typography>*/}
           <MarkdownViewer contents={dialogIssue.description}/>
 
 
